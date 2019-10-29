@@ -11,15 +11,18 @@
 
 #define HEIGHT 800
 #define WIDTH 800
-#define BUFFSIZE 1
+#define BUFFSIZE 5000
 ///usr/share/man/man3/mlx
 
 
 typedef struct	s_cord 
 {
-	int x;
-	int y;
-	int z;
+	int 			x;
+	int 			y;
+	int				z;
+	int				r;
+	int				g;
+	int				b;
 }				t_cord;
 
 typedef struct s_init
@@ -171,24 +174,26 @@ int str_isNum(char *str)
 	return (1);
 }
 
-int first_line_length(int *i, char *file)
+int first_line_length(char *file)
 {
 	int el;
+	int i;
 
+	i = 0;
 	el = 0;
-	while (file[*i] != '\0' && file[*i] != '\n')
+	while (file[i] != '\0' && file[i] != '\n')
 	{
-		if (file[*i] != ' ')
+		if (file[i] != ' ')
 		{
-			while (file[*i] != ' ')
+			while (file[i] != ' ')
 			{
-				if (file[*i] == '\0' || file[*i] == '\n')
+				if (file[i] == '\0' || file[i] == '\n')
 					return (el + 1);
-				*i += 1;
+				i += 1;
 			}	
 			el++;
 		}
-		*i += 1;
+		i += 1;
 	}
 	return (el);
 }
@@ -200,7 +205,7 @@ int line_length_checker(char *file)
 	int checker;
 
 	i = 0;
-	el = first_line_length(&i, file);
+	el = first_line_length(file);
 	while (file[i] != '\0')
 	{
 		if (ft_isdigit(file[i]))
@@ -217,7 +222,7 @@ int line_length_checker(char *file)
 		{
 			if (checker < el)
 			{
-				printf("Found wrong line length. Exiting.\n");
+				ft_putstr("Found wrong line length. 1 Exiting.\n");
 				return (0);
 			}
 			checker = 0;
@@ -244,7 +249,7 @@ int file_checker(char *file)
 		}
 		if (file[i] == '\n' && file[i + 1] == '\n')
 		{
-			printf("Found wrong line length. Exiting.\n");
+			ft_putstr("Found wrong line length. Exiting.\n");
 			wrong = 0;
 			break ;
 		}
@@ -274,6 +279,7 @@ int file_length(char **av)
 		i += ret;
 	while ((ret = read(fd, buf, BUFFSIZE)))
 		i += ret;
+	printf("this is length == %d\n", i);
 	return (i);
 }
 
@@ -296,20 +302,22 @@ char *read_file(char **av)
 	int		ret;
 	int		fd;
 	char	*file;
+	int		k;
 
 	if ((fd = open(av[1], O_RDONLY)) == -1)
 	{
 		ft_putstr("Something wrong with the File\n");
 		exit(0);
 	}
-	if (!(file = ft_strnew(file_length(av))))
+	k = file_length(av);
+	if (!(file = ft_strnew(k)))
 	{
 		ft_putstr("Not enaugh space in device\n");
 		exit(0);
 	}
 	while ((ret = read(fd, buf, BUFFSIZE)))
 		ft_strcat(file, buf);
-	file[file_length(av)] = '\0';
+	file[k] = '\0';
 	return (file);
 }
 
@@ -347,85 +355,113 @@ void	tab_free(char **tab)
 	tab = NULL;
 }
 
-int **map_alloc(char **av, t_init *p)
+int		find_the_coma(char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i] && str[i] != ',')
+		i++;
+	return (i);
+}
+
+t_cord    **map_alloc(char **av, t_init *start)
 {	
-	int 	**map;
 	char 	**tab;
 	char 	**str;
 	int 	i;
 	int 	j;
+	int		k;
+    int 	o;
+	t_cord **map;
 
 	i = 0;
-	j = 0;
 	tab = ft_strsplit(read_file(av), '\n');
-	p->t = tab_length(tab);
-	printf("this is x == %d this us y == %d\n", p->t.x, p->t.y);
-	map = (int **)malloc(sizeof(int *) * (p->t.y + 1));
-	while (i <= p->t.y)
-		map[i++] = (int *)malloc(sizeof(int) * (p->t.x + 1));
+	start->t = tab_length(tab);
+	printf("this is x == %d this us y == %d\n", start->t.x, start->t.y);
+	map = (t_cord **)malloc(sizeof(t_cord*) * start->t.y);
+    while(i < start->t.y)
+        map[i++] = (t_cord *)malloc(sizeof(t_cord)* start->t.x);
+	start->buff = (WIDTH / (start->t.x * 1.5));
+	map[0][0].x = start->ini.x;
+    map[0][0].y = start->ini.y;
 	i = 0;
-	while (i < p->t.y)
+	o = start->ini.y;
+	while (i < start->t.y)
 	{
 		str = ft_strsplit(tab[i], ' ');
 		j = 0;
-		while (j < p->t.x)
-		{
-			map[i][j] = ft_atoi(str[j]);
-			j++;
-		}
-		tab_free(str);
-		i++;
-	}
-	printf("\n");
-	tab_free(tab);
-	map[i] = NULL;
-	return (map);
-}
-
-t_cord    **make_map(int **tab, t_init start)
-{
-    t_cord **map;
-    int i;
-    int j;
-    int k;
-    int o;
-    
-    map = (t_cord **)malloc(sizeof(t_cord*) * start.t.y);
-    i = 0;
-    while(i < start.t.y)
-        map[i++] = (t_cord *)malloc(sizeof(t_cord)* start.t.x);
-    //int fd = open("/dev/ttys000", O_RDWR);
-    map[0][0].x = start.ini.x;
-    map[0][0].y = start.ini.y;
-
-    i = 0;
-    o = map[0][0].y;
-    while (i < start.t.y)
-    {
-        j = 0;
-        k = map[0][0].x;
-        while (j < start.t.x)
+        k = start->ini.x;
+        while (j < start->t.x)
         {
             if (i != 0 || j != 0)
             {
                 map[i][j].x = k;
-                if (j == 0)
-                    map[i][j].y = o;
-                else
-                {
-					o += (tab[i][j - 1] - tab[i][j]);
-                    map[i][j].y = o;
-                }
+                map[i][j].y = o;
             }
-			map[i][j].z = tab[i][j];
-            k += start.buff;
+			// if (ft_strstr(str[j], ","))
+			// {
+			// 	map[i][j].color = ft_strdup(str[j] + find_the_coma(str[j]));
+			// 	map[i][j].z = ft_atoi(str[j]);
+			// }
+			map[i][j].z = ft_atoi(str[j]);
+            k += start->buff;
+			//printf("this is x == %d y == %d z == %d i == %d\n", map[i][j].x, map[i][j].y, map[i][j].z, i);
             j++;
         }
-        o += start.buff;
-        i++;
-    }
-    return (map);
+        o += start->buff;
+		tab_free(str);
+		i++;
+	}
+	//printf("dfgdfgdfgdf\n");
+	tab_free(tab);
+	return (map);
 }
+
+// t_cord    **make_map(int **tab, t_init start)
+// {
+//     t_cord **map;
+//     int i;
+//     int j;
+//     int k;
+//     int o;
+    
+//     map = (t_cord **)malloc(sizeof(t_cord*) * start.t.y);
+//     i = 0;
+//     while(i < start.t.y)
+//         map[i++] = (t_cord *)malloc(sizeof(t_cord)* start.t.x);
+//     //int fd = open("/dev/ttys000", O_RDWR);
+//     map[0][0].x = start.ini.x;
+//     map[0][0].y = start.ini.y;
+
+//     i = 0;
+//     o = map[0][0].y;
+//     while (i < start.t.y)
+//     {
+//         j = 0;
+//         k = map[0][0].x;
+//         while (j < start.t.x)
+//         {
+//             if (i != 0 || j != 0)
+//             {
+//                 map[i][j].x = k;
+//                 if (j == 0)
+//                     map[i][j].y = o;
+//                 else
+//                 {
+// 					o += (tab[i][j - 1] - tab[i][j]);
+//                     map[i][j].y = o;
+//                 }
+//             }
+// 			map[i][j].z = tab[i][j];
+//             k += start.buff;
+//             j++;
+//         }
+//         o += start.buff;
+//         i++;
+//     }
+//     return (map);
+// }
 
 static void iso(int *x, int *y, int z, int mov)
 {
@@ -575,16 +611,15 @@ int key_press(int button, t_init *start)
 		color_function(start, 1);
 	else if (button == 11)
 		color_function(start, 2);
-	start->tmp = make_map(start->map, *start);
+	start->tmp = make_clone(*start);
 	projec_iso(start->tmp, *start);
-
 	drow(*start, start->tmp);
 	mlx_put_image_to_window(start->init, start->win, start->img, 0, 0);
 	//printf("this is the placement %d  \n", button);
 	return 1;
 }
 
-void	init_prog(t_init *start)
+void	init_prog(t_init *start, char **av)
 {
 	int b_p;
 	int s_l;
@@ -600,10 +635,9 @@ void	init_prog(t_init *start)
 	start->g = 0;
 	start->b = 255;
 	start->att = 1;
-	start->buff = (WIDTH / (start->t.x * 1.5));
-	start->v = make_map(start->map, *start);
-	start->tmp = make_clone(*start);
 	start->mov = 0;
+	start->v = map_alloc(av, start);
+	start->tmp = make_clone(*start);
 }
 
 int main(int ac, char **av)
@@ -621,12 +655,11 @@ int main(int ac, char **av)
 	{
 		if (!(file_checker(read_file(av))))
 			return (0);
-		start.map = map_alloc(av, &start);
 		//mlx_mouse_hook(start.win, print_position, &start);
 		//line_draw(s, f, start.img_str);
 		
 		//mlx_key_hook(start.win, key_press, &start);
-		init_prog(&start);
+		init_prog(&start, av);
 		projec_iso(start.tmp, start);
 		drow(start, start.tmp);
 		mlx_put_image_to_window(start.init, start.win, start.img, 0, 0);
