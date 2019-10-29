@@ -37,6 +37,7 @@ typedef struct s_init
 	t_cord			**tmp;
 	t_cord			**v;
 	t_cord			ini;
+	int				mov;
 	int				buff;
 }				t_init;
 
@@ -426,14 +427,14 @@ t_cord    **make_map(int **tab, t_init start)
     return (map);
 }
 
-static void iso(int *x, int *y, int z)
+static void iso(int *x, int *y, int z, int mov)
 {
     int previous_x;
     int previous_y;
 
     previous_x = *x;
     previous_y = *y;
-    *x = (previous_x - previous_y) * cos(0.523599);
+    *x = (previous_x - previous_y) * cos(0.523599) + mov;
     *y = -z + (previous_x + previous_y) * sin(0.523599);
 }
 
@@ -448,7 +449,7 @@ void	projec_iso(t_cord **map, t_init start)
 		j = 0;
 		while(j < start.t.x)
 		{
-			iso(&map[i][j].x, &map[i][j].y, start.att * map[i][j].z);
+			iso(&map[i][j].x, &map[i][j].y, start.att * map[i][j].z, start.mov);
 			j++;
 		}
 		i++;
@@ -563,19 +564,20 @@ int key_press(int button, t_init *start)
 		// if (start->att == 1)
 		// 	start->att -= 1;
 		start->att -= 1;
-	}
+	}	
 	else if (button == 124)
-		start->ini.x += 10;
+		start->mov += 10;
 	else if (button == 123)
-		start->ini.x -= 10;
+		start->mov -= 10;
 	else if (button == 15)
 		color_function(start, 0);
 	else if (button == 5)
 		color_function(start, 1);
 	else if (button == 11)
 		color_function(start, 2);
-	start->tmp = make_clone(*start);
+	start->tmp = make_map(start->map, *start);
 	projec_iso(start->tmp, *start);
+
 	drow(*start, start->tmp);
 	mlx_put_image_to_window(start->init, start->win, start->img, 0, 0);
 	//printf("this is the placement %d  \n", button);
@@ -601,6 +603,7 @@ void	init_prog(t_init *start)
 	start->buff = (WIDTH / (start->t.x * 1.5));
 	start->v = make_map(start->map, *start);
 	start->tmp = make_clone(*start);
+	start->mov = 0;
 }
 
 int main(int ac, char **av)
