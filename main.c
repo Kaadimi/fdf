@@ -20,9 +20,7 @@ typedef struct	s_cord
 	int 			x;
 	int 			y;
 	int				z;
-	int				r;
-	int				g;
-	int				b;
+	int				color;
 }				t_cord;
 
 typedef struct s_init
@@ -42,17 +40,30 @@ typedef struct s_init
 	t_cord			ini;
 	int				mov;
 	int				buff;
+	float			vangl;
+	float			hangl;
+	int				projetction;
+	char			*file;
 }				t_init;
 
-void	ft_light_pixel(t_init start, int x, int y)
+void	ft_light_pixel(t_init start, int x, int y, int color)
 {
 	int i;
 	if (x < 0 || y < 0 || x >= WIDTH || y >= HEIGHT)
 		return ;
 	i = x * 4 + WIDTH * 4 * y;
-	start.img_str[i] = start.b;
-	start.img_str[i + 1] = start.g;
-	start.img_str[i + 2] = start.r;
+	if (color > -1)
+	{
+		start.img_str[i] =  color % 256;
+		start.img_str[i + 1] =  ((color / 256) % 256);
+		start.img_str[i + 2] = (color / (256*256));
+	}
+	else
+	{
+		start.img_str[i] = start.b;
+		start.img_str[i + 1] = start.g;
+		start.img_str[i + 2] = start.r;
+	}
 }
 
 void	ft_vertical_line(unsigned char *img_str, int x, int y, int color)
@@ -80,7 +91,7 @@ void	slop_high(t_cord pi, t_cord pf, t_init start)
 	pxx = 2 * dx - dy;
 	while (pi.y <= pf.y)
 	{
-		ft_light_pixel(start, pi.x, pi.y);
+		ft_light_pixel(start, pi.x, pi.y, pi.color);
 		if (pxx > 0)
 		{
 			pi.x += xi;
@@ -104,7 +115,7 @@ void	slop_low(t_cord pi, t_cord pf, t_init start)
 	pxx = 2 * dy - dx;
 	while (pi.x <= pf.x)
 	{
-		ft_light_pixel(start, pi.x, pi.y);
+		ft_light_pixel(start, pi.x, pi.y, pi.color);
 		if (pxx >= 0)
 		{
 			pi.y += yi;
@@ -133,32 +144,32 @@ void	line_draw(t_cord pi, t_cord pf, t_init start)
 	}
 }
 
-int print_position(int button, int x, int y, t_init *start)
-{
-	/*static int ff;
-	static int mx;
-	static int my;
-	t_cord v1, v2;
+// int print_position(int button, int x, int y, t_init *start)
+// {
+// 	static int ff;
+// 	static int mx;
+// 	static int my;
+// 	t_cord v1, v2;
 
-	if (ff == 0)
-	{
-		mx = x;
-		my = y;
-		ff++;
-	}
-	else if (ff == 1)
-	{
-		v1.x = mx;
-		v1.y = my;
-		v2.x = x;
-		v2.y = y;	
-		line_draw(v1, v2, start->img_str);
-		ff = 0;
-	}
-	mlx_put_image_to_window(start->init, start->win, start->img, 0, 0);*/
-	printf("this is the placement %d   %d    %d\n", button, x, y);
-	return 1;
-}
+// 	if (ff == 0)
+// 	{
+// 		mx = x;
+// 		my = y;
+// 		ff++;
+// 	}
+// 	else if (ff == 1)
+// 	{
+// 		v1.x = mx;
+// 		v1.y = my;
+// 		v2.x = x;
+// 		v2.y = y;	
+// 		line_draw(v1, v2, start->img_str);
+// 		ff = 0;
+// 	}
+// 	mlx_put_image_to_window(start->init, start->win, start->img, 0, 0);
+// 	printf("this is the placement %d   %d    %d\n", button, x, y);
+// 	return 1;
+// }
 
 int str_isNum(char *str)
 {
@@ -232,7 +243,7 @@ int line_length_checker(char *file)
 	return (1);
 }
 
-int file_checker(char *file)
+char	*file_checker(char *file)
 {
 	int i;
 	int wrong;
@@ -241,12 +252,6 @@ int file_checker(char *file)
 	wrong = 1;
 	while (file[i])
 	{
-		if (file[i] != ' ' && file[i] != '\n' && !ft_isdigit(file[i]))
-		{
-			ft_putstr("Wrong Format: <0 0 0 0>.\n");
-			wrong = 0;
-			break ;
-		}
 		if (file[i] == '\n' && file[i + 1] == '\n')
 		{
 			ft_putstr("Found wrong line length. Exiting.\n");
@@ -257,8 +262,10 @@ int file_checker(char *file)
 	}
 	if (wrong == 1)
 		wrong = line_length_checker(file);
-	free(file);
-	return (wrong);
+	if (wrong == 1)
+		return (file);
+	else
+		return (NULL);
 }
 
 int file_length(char **av)
@@ -279,22 +286,8 @@ int file_length(char **av)
 		i += ret;
 	while ((ret = read(fd, buf, BUFFSIZE)))
 		i += ret;
-	printf("this is length == %d\n", i);
 	return (i);
 }
-
-// char *remove_spaces(char *file)
-// {
-// 	char *tmp;
-
-// 	while (ft_strstr(file, "  "))
-// 	{
-// 		tmp = file;
-// 		file = ft_find_replace(file, "  ", " ");
-// 		free(tmp);
-// 	}
-// 	return (file);
-// }
 
 char *read_file(char **av)
 {
@@ -316,7 +309,10 @@ char *read_file(char **av)
 		exit(0);
 	}
 	while ((ret = read(fd, buf, BUFFSIZE)))
-		ft_strcat(file, buf);
+	{
+		buf[ret] = '\0';
+		ft_strcpy(file, buf);
+	}
 	file[k] = '\0';
 	return (file);
 }
@@ -365,103 +361,123 @@ int		find_the_coma(char *str)
 	return (i);
 }
 
+int		index_of(char *str, char c)
+{
+	int i;
+
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] == c)
+			return (i);
+		i++;
+	}
+	return (-1);
+}
+
+int		color_converter(char *hex)
+{
+	char	str[16] = "0123456789ABCDEF";
+	int		tmp;
+	int		i;
+	int		j;
+
+	i = 0;
+	j = 0;
+	tmp = 0;
+	while (hex[i])
+		i++;
+	while (i-- > 2)
+	{
+		tmp += (index_of(str, hex[i]) * pow(16, j));
+		j++;
+	}
+	return (tmp - 1);
+}
+
+void		map_alloc_2(char **tab, int i, t_cord **map, t_init *start)
+{
+	int j;
+	char **str;
+	int o;
+	int k;
+
+	str = ft_strsplit(tab[i], ' ');
+	j = 0;
+	if (i == 0)
+		o = start->ini.y;
+	k = start->ini.x;
+	while (j < start->t.x)
+	{
+		if (i != 0 || j != 0)
+		{
+			map[i][j].x = k - (start->t.x * start->buff / 2);
+            map[i][j].y = o - (start->t.y * start->buff / 2);
+		}
+		if (ft_strstr(str[j], ","))
+		{
+			map[i][j].color = color_converter(str[j] + find_the_coma(str[j]) + 1);
+			str[j][find_the_coma(str[j])] = '\0';
+			map[i][j].z = ft_atoi(str[j]);
+		}
+		else
+		{
+			map[i][j].z = ft_atoi(str[j]);
+			map[i][j].color = -1;
+		}
+		k += start->buff;
+		j++;
+	}
+	o += start->buff;
+	tab_free(str);
+}
+
 t_cord    **map_alloc(char **av, t_init *start)
 {	
 	char 	**tab;
-	char 	**str;
+	char	*file;
 	int 	i;
-	int 	j;
-	int		k;
-    int 	o;
 	t_cord **map;
 
 	i = 0;
-	tab = ft_strsplit(read_file(av), '\n');
+	tab = ft_strsplit(start->file, '\n');
+	free(start->file);
 	start->t = tab_length(tab);
-	printf("this is x == %d this us y == %d\n", start->t.x, start->t.y);
+	//printf("this is x == %d this us y == %d\n", start->t.x, start->t.y);
 	map = (t_cord **)malloc(sizeof(t_cord*) * start->t.y);
     while(i < start->t.y)
         map[i++] = (t_cord *)malloc(sizeof(t_cord)* start->t.x);
 	start->buff = (WIDTH / (start->t.x * 1.5));
-	map[0][0].x = start->ini.x;
-    map[0][0].y = start->ini.y;
+	map[0][0].x = -(start->t.x * start->buff / 2);
+    map[0][0].y = -(start->t.y * start->buff / 2);
 	i = 0;
-	o = start->ini.y;
 	while (i < start->t.y)
-	{
-		str = ft_strsplit(tab[i], ' ');
-		j = 0;
-        k = start->ini.x;
-        while (j < start->t.x)
-        {
-            if (i != 0 || j != 0)
-            {
-                map[i][j].x = k;
-                map[i][j].y = o;
-            }
-			// if (ft_strstr(str[j], ","))
-			// {
-			// 	map[i][j].color = ft_strdup(str[j] + find_the_coma(str[j]));
-			// 	map[i][j].z = ft_atoi(str[j]);
-			// }
-			map[i][j].z = ft_atoi(str[j]);
-            k += start->buff;
-			//printf("this is x == %d y == %d z == %d i == %d\n", map[i][j].x, map[i][j].y, map[i][j].z, i);
-            j++;
-        }
-        o += start->buff;
-		tab_free(str);
-		i++;
-	}
-	//printf("dfgdfgdfgdf\n");
+		map_alloc_2(tab, i++, map, start);
 	tab_free(tab);
 	return (map);
 }
 
-// t_cord    **make_map(int **tab, t_init start)
-// {
-//     t_cord **map;
-//     int i;
-//     int j;
-//     int k;
-//     int o;
-    
-//     map = (t_cord **)malloc(sizeof(t_cord*) * start.t.y);
-//     i = 0;
-//     while(i < start.t.y)
-//         map[i++] = (t_cord *)malloc(sizeof(t_cord)* start.t.x);
-//     //int fd = open("/dev/ttys000", O_RDWR);
-//     map[0][0].x = start.ini.x;
-//     map[0][0].y = start.ini.y;
+static void rotation_vertical(int *x, int *y, int *z, t_init start)
+{
+    int previous_x;
+	int previous_z;
 
-//     i = 0;
-//     o = map[0][0].y;
-//     while (i < start.t.y)
-//     {
-//         j = 0;
-//         k = map[0][0].x;
-//         while (j < start.t.x)
-//         {
-//             if (i != 0 || j != 0)
-//             {
-//                 map[i][j].x = k;
-//                 if (j == 0)
-//                     map[i][j].y = o;
-//                 else
-//                 {
-// 					o += (tab[i][j - 1] - tab[i][j]);
-//                     map[i][j].y = o;
-//                 }
-//             }
-// 			map[i][j].z = tab[i][j];
-//             k += start.buff;
-//             j++;
-//         }
-//         o += start.buff;
-//         i++;
-//     }
-//     return (map);
-// }
+    previous_x = *x;
+	previous_z = *z;
+    *x = previous_x * cos(start.vangl) + previous_z * sin(start.vangl);
+    *z = previous_x * sin(start.vangl) + previous_z * cos(start.vangl);
+}
+
+static void rotation_horizontal(int *x, int *y, int *z, t_init start)
+{
+    int previous_y;
+	int previous_z;
+
+    previous_y = *y;
+	previous_z = *z;
+    *y = (previous_y * cos(start.hangl) + previous_z * sin(start.hangl));
+    *z = (previous_y * sin(start.hangl) + previous_z * cos(start.hangl));
+}
 
 static void iso(int *x, int *y, int z, int mov)
 {
@@ -474,23 +490,46 @@ static void iso(int *x, int *y, int z, int mov)
     *y = -z + (previous_x + previous_y) * sin(0.523599);
 }
 
-void	projec_iso(t_cord **map, t_init start)
+void	projec_iso(t_cord **map, t_init *start)
 {
 	int i;
 	int j;
 
 	i = 0;
-	while(i < start.t.y)
+	start->projetction = 1;
+	while(i < start->t.y)
 	{
 		j = 0;
-		while(j < start.t.x)
+		while(j < start->t.x)
 		{
-			iso(&map[i][j].x, &map[i][j].y, start.att * map[i][j].z, start.mov);
+			iso(&map[i][j].x, &map[i][j].y, start->att * map[i][j].z, start->mov);
+			rotation_horizontal(&map[i][j].x, &map[i][j].y, &map[i][j].z, *start);
+			rotation_vertical(&map[i][j].x, &map[i][j].y, &map[i][j].z, *start);
 			j++;
 		}
 		i++;
 	}
+}
 
+void	projec_parallel(t_cord **map, t_init *start)
+{
+	int i;
+	int j;
+
+	i = 0;
+	start->projetction = 2;
+	while(i < start->t.y)
+	{
+		j = 0;
+		while(j < start->t.x)
+		{
+			map[i][j].z = start->att * map[i][j].z;
+			rotation_horizontal(&map[i][j].x, &map[i][j].y, &map[i][j].z, *start);
+			rotation_vertical(&map[i][j].x, &map[i][j].y, &map[i][j].z, *start);
+			j++;
+		}
+		i++;
+	}
 }
 
 void drow(t_init start, t_cord **map)
@@ -508,14 +547,20 @@ void drow(t_init start, t_cord **map)
         while (j < start.t.x)
         {
             s = map[i][j];
+			s.x = s.x + (WIDTH / 2);
+			s.y = s.y + (HEIGHT / 2);
             if (j + 1 < start.t.x)
             {
                 f = map[i][j + 1];
+				f.x = f.x + (WIDTH / 2);
+				f.y = f.y + (HEIGHT / 2);
                 line_draw(s, f, start);
             }
             if (i + 1 < start.t.y)
             {
                 f = map[i + 1][j];
+				f.x = f.x + (WIDTH / 2);
+				f.y = f.y + (HEIGHT / 2);
                 line_draw(s, f, start);
             }
             j++;
@@ -545,6 +590,7 @@ t_cord    **make_clone(t_init t)
 			map[i][j].x = t.v[i][j].x;
 			map[i][j].y = t.v[i][j].y;
 			map[i][j].z = t.v[i][j].z;
+			map[i][j].color = t.v[i][j].color;
 			j++;
 		}
 		i++;
@@ -583,6 +629,17 @@ void	color_function(t_init *start, int color)
 	}
 }
 
+void	map_free(t_cord **map, t_init start)
+{
+	int i;
+
+	i = 0;
+	while (i < start.t.y)
+		free(map[i++]);
+	free(map);
+	map = NULL;
+}
+
 int key_press(int button, t_init *start)
 {
 	// int b_p;
@@ -593,6 +650,12 @@ int key_press(int button, t_init *start)
 	mlx_destroy_image(start->init, start->img);
 	start->img = mlx_new_image(start->init, HEIGHT, WIDTH);
 	//start->img_str = (unsigned char *)mlx_get_data_addr(start->img, &b_p, &s_l, &endian);
+	if (button == 53)
+	{
+		map_free(start->v, *start);
+		map_free(start->tmp, *start);
+		exit(0);
+	}
 	if (button == 126)
 		start->att += 1;
 	else if (button == 125)
@@ -605,17 +668,40 @@ int key_press(int button, t_init *start)
 		start->mov += 10;
 	else if (button == 123)
 		start->mov -= 10;
+	else if (button == 91)
+		start->hangl -= 0.1;
+	else if (button == 84)
+		start->hangl += 0.1;
+	else if (button == 86)
+		start->vangl -= 0.1;
+	else if (button == 88)
+		start->vangl += 0.1;
 	else if (button == 15)
 		color_function(start, 0);
 	else if (button == 5)
 		color_function(start, 1);
 	else if (button == 11)
 		color_function(start, 2);
+	else if (button == 34)
+	{
+		start->vangl = 0;
+		start->hangl = 0;
+		start->projetction = 1;
+	}
+	else if (button == 35)
+	{
+		start->vangl = 0;
+		start->hangl = 0;
+		start->projetction = 2;
+	}
 	start->tmp = make_clone(*start);
-	projec_iso(start->tmp, *start);
+	if (start->projetction == 1)
+		projec_iso(start->tmp, start);
+	if (start->projetction == 2)
+		projec_parallel(start->tmp, start);
 	drow(*start, start->tmp);
 	mlx_put_image_to_window(start->init, start->win, start->img, 0, 0);
-	//printf("this is the placement %d  \n", button);
+	printf("this is the placement %d  \n", button);
 	return 1;
 }
 
@@ -629,7 +715,7 @@ void	init_prog(t_init *start, char **av)
 	start->win = mlx_new_window(start->init, HEIGHT, WIDTH, "fdf");
 	start->img = mlx_new_image(start->init, HEIGHT, WIDTH);
 	start->img_str = (unsigned char *)mlx_get_data_addr(start->img, &b_p, &s_l, &endian);
-	start->ini.x = 300;
+	start->ini.x = 0;
 	start->ini.y = 0;
 	start->r = 255;
 	start->g = 0;
@@ -638,29 +724,20 @@ void	init_prog(t_init *start, char **av)
 	start->mov = 0;
 	start->v = map_alloc(av, start);
 	start->tmp = make_clone(*start);
+	start->hangl = 0;
+	start->vangl = 0;
 }
 
 int main(int ac, char **av)
 {
 	t_init start;
-	int i = 0;
-	int j = 0;
-	// int 	**map;
-	// t_cord **v;
-	//**********************
 
-	
-	//***********************
 	if (ac == 2)
 	{
-		if (!(file_checker(read_file(av))))
+		if (!(start.file = file_checker(read_file(av))))
 			return (0);
-		//mlx_mouse_hook(start.win, print_position, &start);
-		//line_draw(s, f, start.img_str);
-		
-		//mlx_key_hook(start.win, key_press, &start);
 		init_prog(&start, av);
-		projec_iso(start.tmp, start);
+		projec_iso(start.tmp, &start);
 		drow(start, start.tmp);
 		mlx_put_image_to_window(start.init, start.win, start.img, 0, 0);
 		mlx_hook(start.win, 2, 0, key_press, &start);
