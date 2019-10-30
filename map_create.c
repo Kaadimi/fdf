@@ -6,13 +6,13 @@
 /*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/30 15:50:09 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/30 15:52:22 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/30 22:46:07 by melhakki         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fdf.h"
 
-int		find_the_coma(char *str)
+int			find_the_coma(char *str)
 {
 	int i;
 
@@ -22,13 +22,14 @@ int		find_the_coma(char *str)
 	return (i);
 }
 
-int		color_converter(char *hex)
+int			color_converter(char *hex)
 {
-	char	str[16] = "0123456789ABCDEF";
+	char	*str;
 	int		tmp;
 	int		i;
 	int		j;
 
+	str = "0123456789ABCDEF";
 	i = 0;
 	j = 0;
 	tmp = 0;
@@ -84,19 +85,19 @@ void		map_alloc_2(char **tab, int i, t_cord **map, t_init *start)
 	tab_free(str);
 }
 
-t_cord    **map_alloc(t_init *start)
-{	
-	char 	**tab;
-	int 	i;
-	t_cord **map;
+t_cord		**map_alloc(t_init *start)
+{
+	char	**tab;
+	int		i;
+	t_cord	**map;
 
 	i = 0;
 	tab = ft_strsplit(start->file, '\n');
 	start->t = tab_length(start->file);
 	free(start->file);
 	map = (t_cord **)malloc(sizeof(t_cord*) * start->t.y);
-	while(i < start->t.y)
-		map[i++] = (t_cord *)malloc(sizeof(t_cord)* start->t.x);
+	while (i < start->t.y)
+		map[i++] = (t_cord *)malloc(sizeof(t_cord) * start->t.x);
 	start->buff = (WIDTH / (start->t.x * 1.5));
 	map[0][0].x = -(start->t.x * start->buff / 2);
 	map[0][0].y = -(start->t.y * start->buff / 2);

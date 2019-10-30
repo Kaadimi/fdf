@@ -3,36 +3,43 @@
 /*                                                        :::      ::::::::   */
 /*   fdf.h                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: melhakki <melhakki@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/30 15:43:48 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/30 16:19:31 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/30 22:45:21 by melhakki         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "mlx.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/uio.h>
-#include <unistd.h>
-#include <math.h>
-#include "libft/libft.h"
+#ifndef FDF_H
+# define FDF_H
+# include "mlx.h"
+# include <stdlib.h>
+# include <stdio.h>
+# include <fcntl.h>
+# include <sys/types.h>
+# include <sys/uio.h>
+# include <unistd.h>
+# include <math.h>
+# include "libft/libft.h"
+# define HEIGHT 800
+# define WIDTH 800
+# define BUFFSIZE 5000
 
-
-#define HEIGHT 800
-#define WIDTH 800
-#define BUFFSIZE 5000
-
-
-typedef struct		s_cord 
+typedef struct		s_cord
 {
-	int 			x;
-	int 			y;
+	int				x;
+	int				y;
 	int				z;
 	int				color;
-}				t_cord;
+}					t_cord;
+
+typedef struct		s_norm
+{
+	int				i;
+	int				j;
+	t_cord			s;
+	t_cord			f;
+}					t_norm;
 
 typedef struct		s_init
 {
@@ -79,3 +86,7 @@ t_cord				**make_clone(t_init t);
 void				drow(t_init start, t_cord **map);
 int					index_of(char *str, char c);
 int					first_line_length(char *file);
+void				create_pannel(t_init start);
+void				key_press3(int button, t_init *start);
+
+#endif

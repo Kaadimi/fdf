@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   file_check.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: melhakki <melhakki@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/30 15:45:59 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/30 15:49:48 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/30 23:05:24 by melhakki         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,9 @@
 
 int		line_length_checker_2(char *file, int *i, int el, int *checker)
 {
-	if (ft_isdigit(file[*i]))
+	if (file[*i] != ' ')
 	{
-		while (ft_isdigit(file[*i]))
+		while (file[*i] != ' ')
 		{
 			if (file[*i] == '\0' || file[*i] == '\n')
 				break ;
@@ -56,9 +56,14 @@ char	*file_checker(char *file)
 	int i;
 	int wrong;
 
-	i = 0;
 	wrong = 1;
-	while (file[i])
+	if (ft_strlen(file) <= 1)
+	{
+		ft_putstr("No data found.\n");
+		return (NULL);
+	}
+	i = -1;
+	while (file[++i])
 	{
 		if (file[i] == '\n' && file[i + 1] == '\n')
 		{
@@ -66,7 +71,6 @@ char	*file_checker(char *file)
 			wrong = 0;
 			break ;
 		}
-		i++;
 	}
 	if (wrong == 1)
 		wrong = line_length_checker(file);
@@ -85,7 +89,7 @@ int		file_length(char **av)
 
 	i = 0;
 	fd = open(av[1], O_RDONLY);
-	if ((ret = read(fd, buf, BUFFSIZE)) == - 1)
+	if ((ret = read(fd, buf, BUFFSIZE)) == -1)
 	{
 		ft_putstr("File was open but not read\n");
 		exit(0);
@@ -94,7 +98,6 @@ int		file_length(char **av)
 		i += ret;
 	while ((ret = read(fd, buf, BUFFSIZE)))
 		i += ret;
-	printf("this is length == %d\n", i);
 	return (i);
 }
 

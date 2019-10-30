@@ -6,7 +6,7 @@
 /*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/30 15:52:28 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/30 15:56:24 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/30 20:14:07 by melhakki         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,14 +51,13 @@ void	projec_iso(t_cord **map, t_init *start)
 	int j;
 
 	i = 0;
-	while(i < start->t.y)
+	while (i < start->t.y)
 	{
 		j = 0;
-		while(j < start->t.x)
+		while (j < start->t.x)
 		{
-			iso(&map[i][j].x, &map[i][j].y, start->att * map[i][j].z, start->mov);
-		//	rotation_horizontal(&map[i][j].y, &map[i][j].z, *start);
-		//	rotation_vertical(&map[i][j].x, &map[i][j].z, *start);
+			iso(&map[i][j].x, &map[i][j].y,
+					start->att * map[i][j].z, start->mov);
 			j++;
 		}
 		i++;
@@ -73,10 +72,10 @@ void	projec_parallel(t_cord **map, t_init *start)
 	start->ini.x = 0;
 	start->ini.y = 0;
 	i = 0;
-	while(i < start->t.y)
+	while (i < start->t.y)
 	{
 		j = 0;
-		while(j < start->t.x)
+		while (j < start->t.x)
 		{
 			map[i][j].z = start->att * map[i][j].z;
 			rotation_horizontal(&map[i][j].y, &map[i][j].z, *start);

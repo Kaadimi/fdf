@@ -6,13 +6,13 @@
 /*   By: ikadimi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/30 15:59:21 by ikadimi           #+#    #+#             */
-/*   Updated: 2019/10/30 16:03:36 by ikadimi          ###   ########.fr       */
+/*   Updated: 2019/10/30 22:31:23 by melhakki         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fdf.h"
 
-int		first_line_length(char *file)
+int			first_line_length(char *file)
 {
 	int el;
 	int i;
@@ -28,7 +28,7 @@ int		first_line_length(char *file)
 				if (file[i] == '\0' || file[i] == '\n')
 					return (el + 1);
 				i += 1;
-			}	
+			}
 			el++;
 		}
 		i += 1;
@@ -36,7 +36,7 @@ int		first_line_length(char *file)
 	return (el);
 }
 
-int		index_of(char *str, char c)
+int			index_of(char *str, char c)
 {
 	int i;
 
@@ -53,7 +53,7 @@ int		index_of(char *str, char c)
 t_cord		tab_length(char *file)
 {
 	t_cord	t;
-	int 	i;
+	int		i;
 
 	i = 0;
 	t.x = first_line_length(file);
@@ -80,14 +80,14 @@ void		tab_free(char **tab)
 
 t_cord		**make_clone(t_init t)
 {
-	int i;
-	int j;
-	t_cord **map;
+	int		i;
+	int		j;
+	t_cord	**map;
 
 	i = 0;
 	map = (t_cord **)malloc(sizeof(t_cord*) * t.t.y);
-	while(i < t.t.y)
-		map[i++] = (t_cord *)malloc(sizeof(t_cord)* t.t.x);
+	while (i < t.t.y)
+		map[i++] = (t_cord *)malloc(sizeof(t_cord) * t.t.x);
 	map[0][0].x = t.ini.x;
 	map[0][0].y = t.ini.y;
 	i = 0;
