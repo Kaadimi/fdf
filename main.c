@@ -503,8 +503,7 @@ void	projec_iso(t_cord **map, t_init *start)
 		j = 0;
 		while(j < start->t.x)
 		{
-			iso(&map[i][j].x, &map[i][j].y, map[i][j].z, start->mov);
-			map[i][j].z = start->att * map[i][j].z;
+			iso(&map[i][j].x, &map[i][j].y, start->att * map[i][j].z, start->mov);
 			rotation_horizontal(&map[i][j].x, &map[i][j].y, &map[i][j].z, *start);
 			rotation_vertical(&map[i][j].x, &map[i][j].y, &map[i][j].z, *start);
 			j++;
@@ -526,7 +525,7 @@ void	projec_parallel(t_cord **map, t_init *start)
 		j = 0;
 		while(j < start->t.x)
 		{
-			map[i][j].z = r->att * map[i][j].z;
+			map[i][j].z = start->att * map[i][j].z;
 			rotation_horizontal(&map[i][j].x, &map[i][j].y, &map[i][j].z, *start);
 			rotation_vertical(&map[i][j].x, &map[i][j].y, &map[i][j].z, *start);
 			j++;
